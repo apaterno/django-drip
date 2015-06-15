@@ -3,8 +3,6 @@ import sys
 import datetime
 
 from django.db import models
-from django.db.models import ForeignKey, OneToOneField, ManyToManyField
-from django.db.models.related import RelatedObject
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
@@ -27,7 +25,7 @@ def get_fields(Model,
     """
     Given a Model, return a list of lists of strings with important stuff:
     ...
-    ['test_user__user__customuser', 'customuser', 'User', 'RelatedObject']
+    ['test_user__user__customuser', 'customuser', 'User', 'ForeignObjectRel']
     ['test_user__unique_id', 'unique_id', 'TestUser', 'CharField']
     ['test_user__confirmed', 'confirmed', 'TestUser', 'BooleanField']
     ...
@@ -43,17 +41,13 @@ def get_fields(Model,
         app_label, model_name = Model.split('.')
         Model = models.get_model(app_label, model_name)
 
-    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_all_related_objects()
+    fields = Model._meta.get_fields()
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
 
     stop_recursion = False
     if len(model_stack) > stack_limit:
-        # rudimentary CustomUser->User->CustomUser->User detection
-        if model_stack[-3] == model_stack[-1]:
-            stop_recursion = True
-
         # stack depth shouldn't exceed x
         if len(model_stack) > 5:
             stop_recursion = True
@@ -63,36 +57,25 @@ def get_fields(Model,
             stop_recursion = True
 
     if stop_recursion:
-        return [] # give empty list for "extend"
+        return []  # give empty list for "extend"
 
     for field in fields:
         field_name = field.name
-
-        if isinstance(field, RelatedObject):
-            field_name = field.field.related_query_name()
 
         if parent_field:
             full_field = "__".join([parent_field, field_name])
         else:
             full_field = field_name
 
-        if len([True for exclude in excludes if (exclude in full_field)]):
+        if any(exclude in full_field for exclude in excludes):
             continue
 
         # add to the list
         out_fields.append([full_field, field_name, Model, field.__class__])
 
-        if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
-
-            if isinstance(field, RelatedObject):
-                RelModel = field.model
-                #field_names.extend(get_fields(RelModel, full_field, True))
-            else:
-                RelModel = field.related.parent_model
-
-            out_fields.extend(get_fields(RelModel, full_field, list(model_stack)))
+        if field.is_relation and not stop_recursion:
+            out_fields.extend(get_fields(field.related_model, full_field,
+                                         model_stack))
 
     return out_fields
 
