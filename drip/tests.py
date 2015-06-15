@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -243,7 +243,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value=(timezone.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%S')
+            field_value=(timezone.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%SZ')
         )
         drip = model_drip.drip
 
@@ -260,7 +260,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00Z')
         )
         drip = model_drip.drip
 
@@ -285,7 +285,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00Z')
         )
 
         # then get it's admin view.
@@ -399,7 +399,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00Z')
         )
 
 

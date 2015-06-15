@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
-
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils import timezone
 
 from drip.utils import get_user_model, parse
 
@@ -124,7 +123,7 @@ class QuerySetRule(models.Model):
             qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
-    def filter_kwargs(self, qs, now=datetime.now):
+    def filter_kwargs(self, qs, now=timezone.now):
         # Support Count() as m2m__count
         field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
@@ -159,7 +158,7 @@ class QuerySetRule(models.Model):
 
         return kwargs
 
-    def apply(self, qs, now=datetime.now):
+    def apply(self, qs, now=timezone.now):
 
         kwargs = self.filter_kwargs(qs, now)
         qs = self.apply_any_annotation(qs)
