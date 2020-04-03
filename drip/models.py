@@ -49,8 +49,8 @@ class SentDrip(models.Model):
     """
     date = models.DateTimeField(auto_now_add=True)
 
-    drip = models.ForeignKey('drip.Drip', related_name='sent_drips', on_delete=models.SET_NULL)
-    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name='sent_drips',on_delete=models.SET_NULL)
+    drip = models.ForeignKey('drip.Drip', related_name='sent_drips', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name='sent_drips',on_delete=models.CASCADE, null=True)
 
     subject = models.TextField()
     body = models.TextField()
@@ -89,7 +89,7 @@ class QuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
-    drip = models.ForeignKey(Drip, related_name='queryset_rules', on_delete=models.SET_NULL)
+    drip = models.ForeignKey(Drip, related_name='queryset_rules', on_delete=models.CASCADE)
 
     method_type = models.CharField(max_length=12, default='filter', choices=METHOD_TYPES)
     field_name = models.CharField(max_length=128, verbose_name='Field name of User')
