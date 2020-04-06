@@ -128,6 +128,8 @@ class QuerySetRule(models.Model):
         field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
         field_value = self.field_value
+        if field_value[0]=='{':
+            field_value = json.loads(field_value)
 
         # set time deltas and dates
         if self.field_value.startswith('now-'):
