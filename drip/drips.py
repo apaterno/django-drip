@@ -232,16 +232,15 @@ class DripBase(object):
             message_instance = MessageClass(self, user)
             try:
                 result = message_instance.message.send()
-                if result:
-                    SentDrip.objects.create(
+                SentDrip.objects.create(
                         drip=self.drip_model,
                         user=user,
                         from_email=self.from_email,
                         from_email_name=self.from_email_name,
                         subject=message_instance.subject,
                         body=message_instance.body
-                    )
-                    count += 1
+                )
+                count += 1
             except Exception as e:
                 logging.error("Failed to send drip %s to user %s: %s" % (self.drip_model.id, user, e))
 
